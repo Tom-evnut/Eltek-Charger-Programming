@@ -22,7 +22,7 @@
 #include <FlexCAN.h> //https://github.com/collin80/FlexCAN_Library
 
 /////Version Identifier/////////
-int firmver = 220604;
+int firmver = 220623;
 
 unsigned long looptime = 0;
 
@@ -87,7 +87,7 @@ void loop()
           if (Chargers & (0x01 << y))
           {
             Serial.print(" ID ");
-            Serial.print(y+1);
+            Serial.print(y + 1);
             Serial.print(" Found ");
             Serial.println();
           }
@@ -150,7 +150,7 @@ void canread()
 
 void sendCANChangeId(int oldid, int newid)
 {
-  msg.id = (0x303 | ( oldid << 4));             // Set our transmission address ID
+  msg.id = (0x303 | ((oldid - 1) << 4));           // Set our transmission address ID
   msg.len = 8;            // Data payload 8 bytes
   msg.ext = 0;           // Extended addresses - 0=11-bit 1=29bit
   msg.buf[0] = 1;
@@ -164,7 +164,7 @@ void sendCANChangeId(int oldid, int newid)
   Can0.write(msg);
   delay(10);
 
-  msg.id = (0x303 | ( oldid << 4));          // Set our transmission address ID
+  msg.id = (0x303 | ( (oldid - 1) << 4));        // Set our transmission address ID
   msg.len = 3;            // Data payload 8 bytes
   msg.ext = 0;      // Extended addresses - 0=11-bit 1=29bit
   msg.buf[0] = 1;
