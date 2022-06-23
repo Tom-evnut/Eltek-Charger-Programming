@@ -178,6 +178,22 @@ void sendCANChangeId(int oldid, int newid)
   Can0.write(msg);
 }
 
+void readver(int oldid)
+{
+  msg.id = (0x303 | ( (oldid - 1) << 4));        // Set our transmission address ID
+  msg.len = 2;            // Data payload 8 bytes
+  msg.ext = 0;      // Extended addresses - 0=11-bit 1=29bit
+  msg.buf[0] = 0;
+  msg.buf[1] = 12;
+  //msg.buf[2] = 0x00;
+  //        msg.buf[3]=0x00;
+  //        msg.buf[4]=0x00;
+  //        msg.buf[5]=0x00;
+  //        msg.buf[6]=0x00;
+  //        msg.buf[7]=0x00;
+  Can0.write(msg);
+}
+
 // Settings menu
 void menu()
 {
@@ -226,6 +242,11 @@ void menu()
         incomingByte = 115;
         break;
 
+      case 'i':
+        readver(tempid1);
+        menuload = 0;
+        incomingByte = 115;
+        break;
 
       case 'q': //q to go back to main menu
         menuload = 0;
@@ -255,11 +276,13 @@ void menu()
     Serial.println();
     Serial.println("r - Reprogramme ID");
     Serial.println();
+    Serial.println("i - Read Cur ID Software Ver");
+    Serial.println();
     Serial.print("c - candebug : ");
     Serial.println(candebug);
     Serial.println();
     Serial.println("q - exit menu");
-    debug = 0;
+    //debug = 0;
     menuload = 1;
   }
 }
