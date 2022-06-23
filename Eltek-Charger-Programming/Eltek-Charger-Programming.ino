@@ -69,13 +69,13 @@ void loop()
   }
 
   if (millis() - looptime > 500)
-  {
-    //sendCANChangeId(4, 6);
-    Serial.println();
-    looptime = millis();
-
-    if (debug == 1)
+  { if (debug == 1)
     {
+      //sendCANChangeId(4, 6);
+      Serial.println();
+      looptime = millis();
+
+
       Serial.println(millis());
       Serial.println("Chargers connected");
       if (Chargers > 0)
@@ -105,6 +105,7 @@ void loop()
       Serial.println();
       Serial.println();
     }
+    sendCanUnlock(tempid1);
   }
 }
 
@@ -125,7 +126,7 @@ void canread()
   }
 
 
-  if (candebug == 1 && debug == 1)
+  if (candebug == 1 && (inMsg.id & 0x0F != 0x008))
   {
     Serial.print(millis());
     if ((inMsg.id & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
@@ -146,6 +147,22 @@ void canread()
     }
     Serial.println();
   }
+}
+
+void sendCanUnlock(int oldid)
+{
+  msg.id = (0x303 | ((oldid - 1) << 4));           // Set our transmission address ID
+  msg.len = 8;            // Data payload 8 bytes
+  msg.ext = 0;           // Extended addresses - 0=11-bit 1=29bit
+  msg.buf[0] = 1;
+  msg.buf[1] = 22;
+  msg.buf[2] = 0xF1;
+  msg.buf[3] = 0xE2;
+  msg.buf[4] = 0xD3;
+  msg.buf[5] = 0xC4;
+  msg.buf[6] = 0xB5;
+  msg.buf[7] = 0xA6;
+  Can0.write(msg);
 }
 
 void sendCANChangeId(int oldid, int newid)
@@ -282,7 +299,7 @@ void menu()
     Serial.println(candebug);
     Serial.println();
     Serial.println("q - exit menu");
-    //debug = 0;
+    debug = 0;
     menuload = 1;
   }
 }
