@@ -28,7 +28,8 @@ unsigned long looptime = 0;
 
 uint16_t Chargers = 0;
 uint8_t Chargerid = 0;
-uint8_t tempid1, tempid2 = 0;
+uint8_t tempid1 = 1;
+uint8_t tempid2 = 1;
 
 byte rxBuf[8];
 char msgString[128];                        // Array to store serial string
@@ -69,13 +70,12 @@ void loop()
   }
 
   if (millis() - looptime > 500)
-  { if (debug == 1)
+  {
+    looptime = millis();
+    if (debug == 1)
     {
       //sendCANChangeId(4, 6);
       Serial.println();
-      looptime = millis();
-
-
       Serial.println(millis());
       Serial.println("Chargers connected");
       if (Chargers > 0)
