@@ -22,7 +22,7 @@
 #include <FlexCAN.h> //https://github.com/collin80/FlexCAN_Library
 
 /////Version Identifier/////////
-int firmver = 220623;
+int firmver = 220706;
 
 unsigned long looptime = 0;
 
@@ -126,7 +126,8 @@ void canread()
   }
 
 
-  if (candebug == 1 && (inMsg.id & 0x0F != 0x008))
+  //if (candebug == 1 && (inMsg.id & 0x0F != 0x008))
+  if ((inMsg.id & 0x00F) != 0x008)
   {
     Serial.print(millis());
     if ((inMsg.id & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
@@ -179,7 +180,7 @@ void sendCANChangeId(int oldid, int newid)
   msg.buf[6] = 0xB5;
   msg.buf[7] = 0xA6;
   Can0.write(msg);
-  delay(10);
+  delay(3);
 
   msg.id = (0x303 | ( (oldid - 1) << 4));        // Set our transmission address ID
   msg.len = 3;            // Data payload 8 bytes
@@ -202,6 +203,52 @@ void readver(int oldid)
   msg.ext = 0;      // Extended addresses - 0=11-bit 1=29bit
   msg.buf[0] = 0;
   msg.buf[1] = 12;
+  //msg.buf[2] = 0x00;
+  //        msg.buf[3]=0x00;
+  //        msg.buf[4]=0x00;
+  //        msg.buf[5]=0x00;
+  //        msg.buf[6]=0x00;
+  //        msg.buf[7]=0x00;
+  Can0.write(msg);
+}
+
+void readproto(int oldid)
+{
+  msg.id = (0x303 | ( (oldid - 1) << 4));        // Set our transmission address ID
+  msg.len = 2;            // Data payload 8 bytes
+  msg.ext = 0;      // Extended addresses - 0=11-bit 1=29bit
+  msg.buf[0] = 0x00;
+  msg.buf[1] = 0x01;
+  //msg.buf[2] = 0x00;
+  //        msg.buf[3]=0x00;
+  //        msg.buf[4]=0x00;
+  //        msg.buf[5]=0x00;
+  //        msg.buf[6]=0x00;
+  //        msg.buf[7]=0x00;
+  Can0.write(msg);
+}
+
+void writeproto(int oldid)
+{
+  msg.id = (0x303 | ((oldid - 1) << 4));           // Set our transmission address ID
+  msg.len = 8;            // Data payload 8 bytes
+  msg.ext = 0;           // Extended addresses - 0=11-bit 1=29bit
+  msg.buf[0] = 1;
+  msg.buf[1] = 22;
+  msg.buf[2] = 0xF1;
+  msg.buf[3] = 0xE2;
+  msg.buf[4] = 0xD3;
+  msg.buf[5] = 0xC4;
+  msg.buf[6] = 0xB5;
+  msg.buf[7] = 0xA6;
+  Can0.write(msg);
+  delay(3);
+
+  msg.id = (0x303 | ( (oldid - 1) << 4));        // Set our transmission address ID
+  msg.len = 2;            // Data payload 8 bytes
+  msg.ext = 0;      // Extended addresses - 0=11-bit 1=29bit
+  msg.buf[0] = 0x01;
+  msg.buf[1] = 0x01;
   //msg.buf[2] = 0x00;
   //        msg.buf[3]=0x00;
   //        msg.buf[4]=0x00;
@@ -265,6 +312,18 @@ void menu()
         incomingByte = 115;
         break;
 
+      case 'h':
+        readproto(tempid1);
+        menuload = 0;
+        incomingByte = 115;
+        break;
+
+      case 'j':
+        writeproto(tempid1);
+        menuload = 0;
+        incomingByte = 115;
+        break;
+
       case 'q': //q to go back to main menu
         menuload = 0;
         debug = 1;
@@ -294,6 +353,10 @@ void menu()
     Serial.println("r - Reprogramme ID");
     Serial.println();
     Serial.println("i - Read Cur ID Software Ver");
+    Serial.println();
+    Serial.println("h - Read Protocol Ver");
+    Serial.println();
+    Serial.println("j - Write Eltek Protocl Ver");
     Serial.println();
     Serial.print("c - candebug : ");
     Serial.println(candebug);
